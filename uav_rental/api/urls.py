@@ -1,4 +1,4 @@
-from .views import ProductListCreate, ProductRetrieveUpdateDestroy
+from .views import ProductListCreate, ProductRetrieveUpdateDestroy, CategoryListCreate, CategoryRetrieveUpdateDestroy
 #from rest_framework.routers import DefaultRouter
 from django.urls import path
 
@@ -9,6 +9,8 @@ app_name = "api"
 # urlpatterns = router.urls
 
 urlpatterns = [
-    path('products/<str:pk>', ProductRetrieveUpdateDestroy.as_view(), name='detailproduct'),
+    path('products/<int:pk>', ProductRetrieveUpdateDestroy.as_view(), name='detailproduct'),
     path('products', ProductListCreate.as_view(), name='productlist'),
+    path('categories/<int:pk>', CategoryRetrieveUpdateDestroy.as_view(), name='detailproduct'),
+    path('categories', CategoryListCreate.as_view(), name='productlist'),
 ]
