@@ -41,3 +41,13 @@ class RentalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rental
         fields = ('__all__')
+
+class UserRentalSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(required=False, many=False)
+    product_id = serializers.PrimaryKeyRelatedField(source='product', queryset=Product.objects.all(), allow_null=False)
+    started_at = serializers.DateTimeField(required=True)
+    expired_at = serializers.DateTimeField(required=True)
+
+    class Meta:
+        model = Rental
+        fields = ('__all__')
