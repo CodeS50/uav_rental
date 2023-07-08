@@ -19,3 +19,7 @@ urlpatterns = [
          name='detailproduct'),
     path('rentals', RentalListCreate.as_view(), name='productlist'),
 ]
+
+# products = read all, update&create&delete=admin
+# categories = read all, update&create&delete=admin
+# rentals = read&update&create&delete=admin

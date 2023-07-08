@@ -5,6 +5,7 @@ from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated, 
 from app.models import Product, Category, Rental
 from .serializers import ProductSerializer, CategorySerializer, RentalSerializer
 from django.db.models import Q
+from .permissions import PostIsAdminUser, PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser
 
 # API Views
 
@@ -27,8 +28,14 @@ class ProductDetail(generics.RetrieveAPIView):
 
 
 class ProductListCreate(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, PostIsAdminUser]
     serializer_class = ProductSerializer
+
+    def has_permission(self, request, view):
+        if request.method != "POST":
+            return True
+
+        return False
 
     def get_queryset(self):
         return Product.objects.filter()
@@ -43,7 +50,7 @@ class ProductListCreate(generics.ListCreateAPIView):
 
 
 class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser]
     serializer_class = ProductSerializer
 
     def get_object(self, queryset=None, **kwargs):
@@ -62,7 +69,7 @@ class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
 
 class CategoryListCreate(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, PostIsAdminUser]
     serializer_class = CategorySerializer
 
     def get_queryset(self):
@@ -78,7 +85,7 @@ class CategoryListCreate(generics.ListCreateAPIView):
 
 
 class CategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser]
     serializer_class = CategorySerializer
 
     def get_object(self, queryset=None, **kwargs):
@@ -97,7 +104,7 @@ class CategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
 
 class RentalListCreate(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminUser]
     serializer_class = RentalSerializer
 
     def get_queryset(self):
@@ -125,7 +132,7 @@ class RentalListCreate(generics.ListCreateAPIView):
                 # print(used_count)
                 # print(serializer.validated_data["product"].stocks)
                 if used_count < serializer.validated_data["product"].stocks:
-                    serializer.validated_data["status"] = 0
+                    #serializer.validated_data["status"] = 0
                     serializer.save()
                     return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
                 else:
@@ -137,7 +144,7 @@ class RentalListCreate(generics.ListCreateAPIView):
 
 
 class RentalRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminUser]
     serializer_class = RentalSerializer
 
     def get_object(self, queryset=None, **kwargs):
@@ -184,7 +191,6 @@ class RentalRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
                 # print(used_count)
                 # print(serializer.validated_data["product"].stocks)
                 if used_count < serializer.validated_data["product"].stocks:
-                    serializer.validated_data["status"] = 0
                     serializer.save()
                     return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
                 else:
