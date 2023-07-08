@@ -4,7 +4,7 @@ from .serializers import CustomTokenObtainPairSerializer
 
 
 class CustomObtainTokenPairView(TokenObtainPairView):
-    permission_classes = (AllowAny,)
+    permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
 
 # General Views
