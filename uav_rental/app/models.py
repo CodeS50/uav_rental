@@ -4,11 +4,16 @@ PRODUCT_STATUS = (
     (0, "Active"),
     (1, "Passive")
 )
+
+CATEGORY_STATUS = (
+    (0, "Active"),
+    (1, "Passive")
+)
 # Create your models here.
 
 
 class Category(models.Model):
-    status = models.IntegerField(choices=PRODUCT_STATUS, default=0)
+    status = models.IntegerField(choices=CATEGORY_STATUS, default=0)
     name = models.CharField(max_length=200)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
