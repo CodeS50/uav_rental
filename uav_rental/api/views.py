@@ -3,28 +3,12 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, BasePermission, IsAdminUser, DjangoModelPermissions
 from app.models import Product, Category, Rental
-from .serializers import ProductSerializer, CategorySerializer, RentalSerializer, UserRentalSerializer
+from .serializers import ProductSerializer, CategorySerializer, RentalSerializer, UserRentalSerializer, RegisterUserSerializer
 from django.db.models import Q
 from .permissions import PostIsAdminUser, PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser
+from django.contrib.auth.models import User
 
 # API Views
-
-"""
-class ProductList(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        return Product.objects.filter()
-
-
-class ProductDetail(generics.RetrieveAPIView):
-    serializer_class = ProductSerializer
-
-    def get_object(self, queryset=None, **kwargs):
-        item = self.kwargs.get('pk')
-        return get_object_or_404(Product, id=item)
-"""
 
 
 class ProductListCreate(generics.ListCreateAPIView):
@@ -50,7 +34,8 @@ class ProductListCreate(generics.ListCreateAPIView):
 
 
 class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser]
+    permission_classes = [IsAuthenticatedOrReadOnly,
+                          PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser]
     serializer_class = ProductSerializer
 
     def get_object(self, queryset=None, **kwargs):
@@ -85,7 +70,8 @@ class CategoryListCreate(generics.ListCreateAPIView):
 
 
 class CategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly, PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser]
+    permission_classes = [IsAuthenticatedOrReadOnly,
+                          PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser]
     serializer_class = CategorySerializer
 
     def get_object(self, queryset=None, **kwargs):
@@ -249,3 +235,25 @@ class UserRentalRetrieve(generics.RetrieveAPIView):
     def get_object(self, queryset=None, **kwargs):
         item = self.kwargs.get('pk')
         return get_object_or_404(Rental, id=item, user=self.request.user)
+
+
+class UserCreate(generics.CreateAPIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, format='json'):
+        serializer = RegisterUserSerializer(data=request.data)
+        if serializer.is_valid():
+            used_count_query = User.objects.filter(
+                username=serializer.validated_data["username"]
+            )
+            used_count_query2 = User.objects.filter(
+                email=serializer.validated_data["email"]
+            )
+            if used_count_query.count() > 0 or used_count_query2.count() > 0:
+                return Response({"status": "error", "message": "this username or password is used"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user = serializer.save()
+                if user:
+                    json = serializer.data
+                    return Response(json, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

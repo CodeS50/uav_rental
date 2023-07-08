@@ -1,4 +1,4 @@
-from .views import ProductListCreate, ProductRetrieveUpdateDestroy, CategoryListCreate, CategoryRetrieveUpdateDestroy, RentalListCreate, RentalRetrieveUpdateDestroy, UserRentalListCreate, UserRentalRetrieve
+from .views import ProductListCreate, ProductRetrieveUpdateDestroy, CategoryListCreate, CategoryRetrieveUpdateDestroy, RentalListCreate, RentalRetrieveUpdateDestroy, UserRentalListCreate, UserRentalRetrieve, UserCreate
 #from rest_framework.routers import DefaultRouter
 from django.urls import path
 
@@ -22,6 +22,9 @@ urlpatterns = [
     path('user/rentals', UserRentalListCreate.as_view(), name='userrentallistcreate'),
     path('user/rentals/<int:pk>', UserRentalRetrieve.as_view(),
          name='userrentaldetail'),
+    
+    path('register', UserCreate.as_view(),
+         name='userrregister'),
 ]
 
 # products = read all, update&create&delete=admin
