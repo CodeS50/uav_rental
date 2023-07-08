@@ -28,9 +28,9 @@ class ProductListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -50,7 +50,7 @@ class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             serializer.save()
             return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
         else:
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryListCreate(generics.ListCreateAPIView):
@@ -64,9 +64,9 @@ class CategoryListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -86,7 +86,7 @@ class CategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             serializer.save()
             return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
         else:
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RentalListCreate(generics.ListCreateAPIView):
@@ -120,13 +120,13 @@ class RentalListCreate(generics.ListCreateAPIView):
                 if used_count < serializer.validated_data["product"].stocks:
                     #serializer.validated_data["status"] = 0
                     serializer.save()
-                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
                 else:
                     return Response({"status": "error", "message": "product stock is insufficient"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({"status": "error", "message": "product is not available for purchase"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RentalRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
@@ -184,7 +184,7 @@ class RentalRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             else:
                 return Response({"status": "error", "message": "product is not available for purchase"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserRentalListCreate(generics.ListCreateAPIView):
@@ -219,13 +219,13 @@ class UserRentalListCreate(generics.ListCreateAPIView):
                     serializer.validated_data["status"] = 0
                     serializer.validated_data["user"] = self.request.user
                     serializer.save()
-                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
                 else:
                     return Response({"status": "error", "message": "product stock is insufficient"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({"status": "error", "message": "product is not available for purchase"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserRentalRetrieve(generics.RetrieveAPIView):
@@ -254,6 +254,6 @@ class UserCreate(generics.CreateAPIView):
             else:
                 user = serializer.save()
                 if user:
-                    json = serializer.data
-                    return Response(json, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"status": "error", "message": "please check the fields", "fields": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
