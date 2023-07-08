@@ -7,4 +7,4 @@ class CustomObtainTokenPairView(TokenObtainPairView):
     permission_classes = (AllowAny,)
     serializer_class = CustomTokenObtainPairSerializer
 
-# Create your views here.
+# General Views
