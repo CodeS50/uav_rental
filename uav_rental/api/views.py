@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, BasePermission, IsAdminUser, DjangoModelPermissions
 from app.models import Product, Category, Rental
 from .serializers import ProductSerializer, CategorySerializer, RentalSerializer
+from django.db.models import Q
 
 # API Views
 
@@ -105,14 +106,32 @@ class RentalListCreate(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, partial=True)
         if serializer.is_valid():
-            # ilgili product al status ve stocks kontrol et
-            # ilgili ürün için ilgili tarihlerde rental içerisinde arama yap
-            # eğer sayı stocks sayısını geçiyorsa oluşturamaz
-            # eğer sayı stocks sayısı altındaysa oluşturabilir
-            # bu sayede aynı tarihlerde olmayan ürünün kiralaması yapılamaz
-            # tüm bunların içerisinde her sorgulamada status kotnrolleri sağlanmalı
-            serializer.save()
-            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            if serializer.validated_data["product"].status == 1:
+                used_count_query = Rental.objects.filter(
+                    Q(
+                        started_at__lte=serializer.validated_data["started_at"],
+                        expired_at__gte=serializer.validated_data["started_at"]
+                    ) | Q(
+                        started_at__lte=serializer.validated_data["expired_at"],
+                        expired_at__gte=serializer.validated_data["expired_at"]
+                    )
+                ).filter(
+                    product=serializer.validated_data["product"]
+                ).filter(
+                    status__in=(0, 1)
+                )
+                used_count = used_count_query.count()
+                # print(used_count_query.query)
+                # print(used_count)
+                # print(serializer.validated_data["product"].stocks)
+                if used_count < serializer.validated_data["product"].stocks:
+                    serializer.validated_data["status"] = 0
+                    serializer.save()
+                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": "error", "message": "product stock is insufficient"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"status": "error", "message": "product is not available for purchase"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -130,8 +149,47 @@ class RentalRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(
             instance, data=request.data, partial=True)
         if serializer.is_valid():
-            # post isteğiyle aynı kontroller olmalı fakat count alınırken kendisi dahil olmamalı bu detaya dikkat edilmeli
-            serializer.save()
-            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+            if serializer.validated_data["product"].status == 1:
+                on_used_count_query = Rental.objects.filter(
+                    Q(
+                        started_at__lte=serializer.validated_data["started_at"],
+                        expired_at__gte=serializer.validated_data["started_at"]
+                    ) | Q(
+                        started_at__lte=serializer.validated_data["expired_at"],
+                        expired_at__gte=serializer.validated_data["expired_at"]
+                    )
+                ).filter(
+                    product=serializer.validated_data["product"]
+                ).filter(
+                    status__in=(0, 1)
+                ).filter(
+                    id=self.kwargs.get('pk')
+                )
+
+                used_count_query = Rental.objects.filter(
+                    Q(
+                        started_at__lte=serializer.validated_data["started_at"],
+                        expired_at__gte=serializer.validated_data["started_at"]
+                    ) | Q(
+                        started_at__lte=serializer.validated_data["expired_at"],
+                        expired_at__gte=serializer.validated_data["expired_at"]
+                    )
+                ).filter(
+                    product=serializer.validated_data["product"]
+                ).filter(
+                    status__in=(0, 1)
+                )
+                used_count = used_count_query.count() - on_used_count_query.count()
+                # print(used_count_query.query)
+                # print(used_count)
+                # print(serializer.validated_data["product"].stocks)
+                if used_count < serializer.validated_data["product"].stocks:
+                    serializer.validated_data["status"] = 0
+                    serializer.save()
+                    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": "error", "message": "product stock is insufficient"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"status": "error", "message": "product is not available for purchase"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
