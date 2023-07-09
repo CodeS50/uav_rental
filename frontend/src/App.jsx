@@ -11,12 +11,12 @@ import 'bootstrap/dist/js/bootstrap.bundle';
 import 'react-toastify/dist/ReactToastify.css';
 import './Assets/css/style.css';
 
-// const Master = lazy(() => import('./Layouts/MasterLayout/Master'));
+const Master = lazy(() => import('./Layouts/MasterLayout/Master'));
 const Auth = lazy(() => import('./Layouts/AuthLayout/Auth'));
 
 const AppLayout = ({ isLogged }) => {
   if (isLogged) {
-    return 'OKKKKK'; // <Master />;
+    return <Master />;
   }
   return <Auth />;
 };
