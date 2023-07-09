@@ -23,7 +23,9 @@ Postman döküman adresi içerisinde her bir API için detaylı açıklama olmas
 
 
 ## Install
+```
 docker volume create sql-data
 sudo docker-compose up -d --build
 sudo docker-compose exec backend python3 manage.py migrate
 sudo docker-compose exec backend python3 manage.py createsuperuser
+```
