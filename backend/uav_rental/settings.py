@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -107,16 +107,28 @@ WSGI_APPLICATION = 'uav_rental.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "uav_rental_db",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "192.168.1.57", #"HOST": "172.17.6.102",
-        "PORT": "5432",
+if(os.environ.get('POSTGRES_HOST') == None):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "uav_rental_db",
+            "USER": "root",
+            "PASSWORD": "root",
+            "HOST": "192.168.1.57", #"HOST": "172.17.6.102", "HOST": "192.168.1.57",
+            "PORT": "5432",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get('POSTGRES_NAME'), #"uav_rental_db",
+            "USER": os.environ.get('POSTGRES_USER'),
+            "PASSWORD": os.environ.get('POSTGRES_PASSWORD'),
+            "HOST": os.environ.get('POSTGRES_HOST'), #"HOST": "172.17.6.102", "HOST": "192.168.1.57",
+            "PORT": os.environ.get('POSTGRES_PORT'),
+        }
+    }
 
 
 # Password validation
