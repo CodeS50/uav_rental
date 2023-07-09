@@ -1,0 +1,39 @@
+version: '3'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=uav_rental_db
+    ports:
+      - '5432:5432'
+    volumes: 
+      - ./sql-data:/var/lib/postgresql/data/
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+  backend:
+    build: backend/
+    image: 'uavrental-backend'
+    container_name: 'uav_rental_backend_container'
+    restart: unless-stopped
+    environment:
+      - POSTGRES_HOST=pg_container
+      - POSTGRES_PORT=5432
+      - POSTGRES_NAME=uav_rental_db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    depends_on:
+      - db
+    ports:
+      - '7000:7000'
+    privileged: True
