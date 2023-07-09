@@ -7,6 +7,7 @@ from .serializers import ProductSerializer, CategorySerializer, RentalSerializer
 from django.db.models import Q
 from .permissions import PostIsAdminUser, PutIsAdminUser, PatchIsAdminUser, DeleteIsAdminUser
 from django.contrib.auth.models import User
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 # API Views
 
@@ -14,12 +15,9 @@ from django.contrib.auth.models import User
 class ProductListCreate(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, PostIsAdminUser]
     serializer_class = ProductSerializer
-
-    def has_permission(self, request, view):
-        if request.method != "POST":
-            return True
-
-        return False
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name', 'brand', 'model']
+    ordering_fields = ['name', 'model', 'brand', 'stocks']
 
     def get_queryset(self):
         return Product.objects.filter()
@@ -56,6 +54,9 @@ class ProductRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 class CategoryListCreate(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, PostIsAdminUser]
     serializer_class = CategorySerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name']
 
     def get_queryset(self):
         return Category.objects.filter()
@@ -92,6 +93,9 @@ class CategoryRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 class RentalListCreate(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = RentalSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['status', 'started_at', 'expired_at']
+    ordering_fields = ['status', 'started_at', 'expired_at']
 
     def get_queryset(self):
         return Rental.objects.filter()
@@ -190,6 +194,9 @@ class RentalRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 class UserRentalListCreate(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserRentalSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['started_at', 'expired_at']
+    ordering_fields = ['started_at', 'expired_at']
 
     def get_queryset(self):
         return Rental.objects.filter(user=self.request.user)
